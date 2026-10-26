@@ -5,18 +5,18 @@ its own folder and can be opened or compiled independently.
 
 ## Patterns
 
-- [Bridge](Bridge/): separates media types from playback devices.
-- [Composite](Composite/): treats files and folders through a shared interface.
-- [Decorator](Decorator/): demonstrates the Decorator pattern.
+- [Bridge](DesignPatterns/Bridge/): separates media types from playback devices.
+- [Composite](DesignPatterns/Composite/): treats files and folders through a shared interface.
+- [Decorator](DesignPatterns/Decorator/): demonstrates the Decorator pattern.
 
-Each folder contains its Java source files under `src/`.
+Each pattern folder inside `DesignPatterns/` contains its Java source files under `src/`.
 
 ## Run an example
 
 From a pattern folder, compile and run its `Main` class. For example:
 
 ```sh
-cd Bridge
+cd DesignPatterns/Bridge
 javac -d out src/*.java
 java -cp out Main
 ```
