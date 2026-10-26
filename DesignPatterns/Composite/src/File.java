@@ -1,6 +1,7 @@
-/** Leaf in the file system tree. */
+
 public class File implements FileSystemComponent {
-    private final String name;
+
+    private String name;
 
     public File(String name) {
         this.name = name;
@@ -8,12 +9,7 @@ public class File implements FileSystemComponent {
 
     @Override
     public void display() {
-        display(0);
-    }
-
-    @Override
-    public void display(int indentation) {
-        System.out.println("  ".repeat(indentation) + "File: " + name);
+        System.out.println("File: " + name);
     }
 
     @Override

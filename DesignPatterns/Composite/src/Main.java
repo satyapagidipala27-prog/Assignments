@@ -1,32 +1,44 @@
+
 public class Main {
+
     public static void main(String[] args) {
-        Folder root = new Folder("root");
-        Folder documents = new Folder("documents");
-        Folder photos = new Folder("photos");
 
-        File readme = new File("readme.txt");
-        File report = new File("report.pdf");
-        File notes = new File("notes.txt");
-        File holidayPhoto = new File("holiday.jpg");
+        // Create folders
+        Folder root = new Folder("Root");
+        Folder documents = new Folder("Documents");
+        Folder projects = new Folder("Projects");
+        Folder images = new Folder("Images");
 
-        // Build the tree: folders can contain either leaf files or composites.
-        root.add(readme);
-        root.add(documents);
-        documents.add(report);
+        // Create files
+        File resume = new File("Resume.pdf");
+        File notes = new File("Notes.txt");
+        File javaFile = new File("Main.java");
+        File readme = new File("README.txt");
+        File photo = new File("photo.jpg");
+
+        // Add files to Documents
+        documents.add(resume);
         documents.add(notes);
-        documents.add(photos);
-        photos.add(holidayPhoto);
 
-        System.out.println("File system:");
+        // Add files to Projects
+        projects.add(javaFile);
+        projects.add(readme);
+
+        // Add file to Images
+        images.add(photo);
+
+        // Add nested folders to Documents
+        documents.add(projects);
+        documents.add(images);
+
+        // Add Documents to Root
+        root.add(documents);
+
+        // Display the entire hierarchy
+        System.out.println("=== File System Hierarchy ===");
         root.display();
-        System.out.println("Total files: " + root.countFiles());
 
-        // Manipulate the hierarchy using Folder's composite operations.
-        documents.remove(notes);
-        photos.add(new File("profile.png"));
-
-        System.out.println("\nAfter removing notes.txt and adding profile.png:");
-        root.display();
-        System.out.println("Total files: " + root.countFiles());
+        // Count all files
+        System.out.println("\nTotal files: " + root.countFiles());
     }
 }
