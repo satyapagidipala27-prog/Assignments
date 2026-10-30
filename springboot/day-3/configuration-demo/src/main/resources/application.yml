@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: configuration-demo
+
+app:
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: demo@example.com
+    enabled: true
+    from: noreply@example.com
+  storage:
+    location: ./uploads
+    max-file-size-mb: 10
+    allowed-extensions:
+      - pdf
+      - docx
+      - txt
