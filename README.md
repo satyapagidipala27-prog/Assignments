@@ -6,6 +6,7 @@ its own folder and can be opened or compiled independently.
 ## Patterns
 
 - [Bridge](DesignPatterns/Bridge/): separates media types from playback devices.
+- [Chain of Responsibility](DesignPatterns/chain_of_responsibility/): passes requests through linked middleware handlers.
 - [Composite](DesignPatterns/Composite/): treats files and folders through a shared interface.
 - [Decorator](DesignPatterns/Decorator/): demonstrates the Decorator pattern.
 - [Facade](DesignPatterns/Facade/): provides a simple interface for home automation subsystems.
