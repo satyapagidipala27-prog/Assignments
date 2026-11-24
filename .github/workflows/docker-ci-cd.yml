@@ -35,8 +35,10 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
+          cache-dependency-path: springboot/day_4_7/pom.xml
 
       - name: Run Maven tests
+        working-directory: springboot/day_4_7
         run: chmod +x mvnw && ./mvnw -B clean verify
 
       - name: Set up Docker Buildx
@@ -63,7 +65,7 @@ jobs:
       - name: Build and publish Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./springboot/day_4_7
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
