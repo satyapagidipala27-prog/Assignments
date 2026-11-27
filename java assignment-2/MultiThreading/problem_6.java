@@ -1,162 +1,114 @@
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import java.util.*;
-import java.util.concurrent.locks.*;
+class WaitNotifyBuffer {
 
-class SharedBuffer1 {
+    private int value;
+    private boolean available;
 
-    private Queue<Integer> queue = new LinkedList<>();
-
-    private final int capacity = 5;
-
-    // Create ReentrantLock
-    private final ReentrantLock lock = new ReentrantLock();
-
-    // Create Conditions
-    private final Condition notFull = lock.newCondition();
-    private final Condition notEmpty = lock.newCondition();
-
-    // Producer method
-    public void produce(int value) throws InterruptedException {
-
-        lock.lock();
-
-        try {
-
-            while (queue.size() == capacity) {
-
-                System.out.println(
-                        Thread.currentThread().getName()
-                                + " waiting: Buffer is full"
-                );
-
-                notFull.await();
-            }
-
-            queue.add(value);
-
-            System.out.println(
-                    Thread.currentThread().getName()
-                            + " produced: " + value
-            );
-
-            // Notify waiting consumers
-            notEmpty.signalAll();
-
-        } finally {
-
-            lock.unlock();
+    public synchronized void put(int next) throws InterruptedException {
+        while (available) {
+            wait();
         }
+        value = next;
+        available = true;
+        System.out.println("wait/notify produced: " + next);
+        notifyAll();
     }
 
-    // Consumer method
-    public int consume() throws InterruptedException {
-
-        lock.lock();
-
-        try {
-
-            while (queue.isEmpty()) {
-
-                System.out.println(
-                        Thread.currentThread().getName()
-                                + " waiting: Buffer is empty"
-                );
-
-                notEmpty.await();
-            }
-
-            int value = queue.poll();
-
-            System.out.println(
-                    Thread.currentThread().getName()
-                            + " consumed: " + value
-            );
-
-            // Notify waiting producers
-            notFull.signalAll();
-
-            return value;
-
-        } finally {
-
-            lock.unlock();
+    public synchronized int take() throws InterruptedException {
+        while (!available) {
+            wait();
         }
+        int result = value;
+        available = false;
+        notifyAll();
+        return result;
+    }
+}
+
+class LinkedQueueBuffer {
+
+    private final BlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
+
+    public void put(int value) throws InterruptedException {
+        queue.put(value);
+        System.out.println("LinkedBlockingQueue produced: " + value);
+    }
+
+    public int take() throws InterruptedException {
+        return queue.take();
     }
 }
 
 public class problem_6 {
 
-    public static void main(String[] args)
-            throws InterruptedException {
+    private static final int STOP = -1;
 
-        SharedBuffer buffer = new SharedBuffer();
+    public static void main(String[] args) throws InterruptedException {
+        runWaitNotifyExample();
+        runLinkedBlockingQueueExample();
+    }
 
-        // Producer 1
-        Thread p1 = new Thread(() -> {
-
+    private static void runWaitNotifyExample() throws InterruptedException {
+        System.out.println("Producer-consumer with wait() and notifyAll():");
+        WaitNotifyBuffer buffer = new WaitNotifyBuffer();
+        Thread producer = new Thread(() -> {
             try {
                 for (int i = 1; i <= 5; i++) {
-                    buffer.produce(i);
+                    buffer.put(i);
                 }
+                buffer.put(STOP);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }, "WaitNotify-Producer");
 
-        }, "Producer-1");
-
-        // Producer 2
-        Thread p2 = new Thread(() -> {
-
+        Thread consumer = new Thread(() -> {
             try {
-                for (int i = 6; i <= 10; i++) {
-                    buffer.produce(i);
+                int value;
+                while ((value = buffer.take()) != STOP) {
+                    System.out.println("wait/notify consumed: " + value);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }, "WaitNotify-Consumer");
 
-        }, "Producer-2");
+        producer.start();
+        consumer.start();
+        producer.join();
+        consumer.join();
+    }
 
-        // Consumer 1
-        Thread c1 = new Thread(() -> {
-
-            try {
-                for (int i = 1; i <= 5; i++) {
-                    buffer.consume();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-        }, "Consumer-1");
-
-        // Consumer 2
-        Thread c2 = new Thread(() -> {
-
+    private static void runLinkedBlockingQueueExample() throws InterruptedException {
+        System.out.println("\nProducer-consumer with LinkedBlockingQueue:");
+        LinkedQueueBuffer buffer = new LinkedQueueBuffer();
+        Thread producer = new Thread(() -> {
             try {
                 for (int i = 1; i <= 5; i++) {
-                    buffer.consume();
+                    buffer.put(i);
+                }
+                buffer.put(STOP);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }, "Queue-Producer");
+
+        Thread consumer = new Thread(() -> {
+            try {
+                int value;
+                while ((value = buffer.take()) != STOP) {
+                    System.out.println("LinkedBlockingQueue consumed: " + value);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }, "Queue-Consumer");
 
-        }, "Consumer-2");
-
-        // Start all threads
-        p1.start();
-        p2.start();
-
-        c1.start();
-        c2.start();
-
-        // Wait for all threads to finish
-        p1.join();
-        p2.join();
-
-        c1.join();
-        c2.join();
-
-        System.out.println("All tasks completed");
+        producer.start();
+        consumer.start();
+        producer.join();
+        consumer.join();
     }
 }
