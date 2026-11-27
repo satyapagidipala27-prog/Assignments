@@ -1,74 +1,61 @@
 
-class SharedBuffer {
+class Counter {
 
-    private int data;
-    private boolean available = false;
+    private int count = 0;
 
-    // Producer method
-    public synchronized void produce(int value)
-            throws InterruptedException {
-
-        while (available) {
-            wait(); // Wait if buffer is full
-        }
-
-        data = value;
-        available = true;
-
-        System.out.println("Produced: " + data);
-
-        notify(); // Notify consumer
+    // Synchronized method
+    public synchronized void accessMethod() {
+        count++;
     }
 
-    // Consumer method
-    public synchronized void consume()
-            throws InterruptedException {
-
-        while (!available) {
-            wait(); // Wait if buffer is empty
-        }
-
-        System.out.println("Consumed: " + data);
-
-        available = false;
-
-        notify(); // Notify producer
+    // Return final count
+    public int getCount() {
+        return count;
     }
 }
 
 public class problem_4 {
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+            throws InterruptedException {
 
-        SharedBuffer buffer = new SharedBuffer();
+        Counter counter = new Counter();
 
-        // Producer thread
-        Thread producer = new Thread(() -> {
+        int numberOfThreads = 5;
+        int callsPerThread = 1000;
 
-            try {
-                for (int i = 1; i <= 5; i++) {
-                    buffer.produce(i);
+        Thread[] threads = new Thread[numberOfThreads];
+
+        // Create threads
+        for (int i = 0; i < numberOfThreads; i++) {
+
+            threads[i] = new Thread(() -> {
+
+                for (int j = 0; j < callsPerThread; j++) {
+
+                    counter.accessMethod();
+
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
 
-        });
+            });
 
-        // Consumer thread
-        Thread consumer = new Thread(() -> {
+        }
 
-            try {
-                for (int i = 1; i <= 5; i++) {
-                    buffer.consume();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+        // Start all threads
+        for (int i = 0; i < numberOfThreads; i++) {
+            threads[i].start();
+        }
 
-        });
+        // Wait for all threads
+        for (int i = 0; i < numberOfThreads; i++) {
+            threads[i].join();
+        }
 
-        producer.start();
-        consumer.start();
+        // Print final count
+        System.out.println("Number of threads: " + numberOfThreads);
+
+        System.out.println("Calls per thread: " + callsPerThread);
+
+        System.out.println("Total method accesses: " + counter.getCount());
     }
 }
